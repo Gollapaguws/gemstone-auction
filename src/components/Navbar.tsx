@@ -145,6 +145,12 @@ export default function Navbar() {
               <Link href="/contact" className="text-[#2B2C30] hover:text-[#EDED3B] font-semibold text-sm uppercase tracking-wider transition-colors" style={{ fontFamily: "Poppins, sans-serif" }}>
                 CONTACT
               </Link>
+              {isAdmin && (
+                <Link href="/admin" className="flex items-center gap-1 text-[#EDED3B] hover:text-[#2B2C30] font-semibold text-sm uppercase tracking-wider transition-colors bg-[#2B2C30] hover:bg-[#EDED3B] px-3 py-1.5 rounded" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  <Shield size={14} />
+                  ADMIN
+                </Link>
+              )}
             </div>
 
             {/* Right Icons */}
@@ -198,6 +204,11 @@ export default function Navbar() {
               <Link href="/live-sales" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>LIVE SALES</Link>
               <Link href="/we-buy-collections" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>WE BUY COLLECTIONS</Link>
               <Link href="/contact" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>CONTACT</Link>
+              {isAdmin && (
+                <Link href="/admin" className="flex items-center gap-2 py-2 text-[#EDED3B] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  <Shield size={14} /> ADMIN PANEL
+                </Link>
+              )}
               <div className="pt-4 border-t border-gray-100 space-y-2">
                 {user ? (
                   <>
