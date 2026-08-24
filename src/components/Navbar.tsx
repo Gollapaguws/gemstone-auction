@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Menu, X, Search, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut } from "lucide-react";
+import { createSupabaseClient } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const categories = [
   { name: "Fine Minerals", href: "/catalogue?category=fine-minerals" },
@@ -15,8 +18,23 @@ const categories = [
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createSupabaseClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +43,14 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createSupabaseClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header className={`w-full sticky top-0 z-50 transition-all duration-300 ${isScrolled ? "shadow-lg" : ""}`}>
@@ -35,9 +61,21 @@ export default function Navbar() {
             <span>THE WEALTH OF AFRICA LIES BENEATH THE EARTH</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-white transition-colors">LOGIN</Link>
-            <Link href="/register" className="hover:text-white transition-colors">REGISTER</Link>
-            <Link href="/dashboard" className="hover:text-white transition-colors">MY ACCOUNT</Link>
+            {user ? (
+              <>
+                <Link href="/dashboard" className="hover:text-white transition-colors">
+                  {user.user_metadata?.full_name || "MY ACCOUNT"}
+                </Link>
+                <button onClick={handleSignOut} className="hover:text-white transition-colors cursor-pointer">
+                  LOGOUT
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hover:text-white transition-colors">LOGIN</Link>
+                <Link href="/register" className="hover:text-white transition-colors">REGISTER</Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -47,11 +85,14 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-[#2B2C30] tracking-wider" style={{ fontFamily: "Poppins, sans-serif" }}>
-                AFRICAN GEMS<span className="text-[#EDED3B]">&</span>MINERALS
-              </h1>
-              <p className="text-[10px] text-gray-500 tracking-widest uppercase" style={{ fontFamily: "Hind, sans-serif" }}>The Wealth of Africa Lies Beneath the Earth</p>
+            <Link href="/" className="flex-shrink-0 flex items-center gap-3">
+              <img src="/logo.png" alt="African Gems & Minerals" className="h-16 w-auto" />
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold text-[#2B2C30] tracking-wider leading-tight" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  AFRICAN GEMS<span className="text-[#EDED3B]">&amp;</span>MINERALS
+                </h1>
+                <p className="text-[9px] text-gray-500 tracking-widest uppercase" style={{ fontFamily: "Hind, sans-serif" }}>The Wealth of Africa Lies Beneath the Earth</p>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
@@ -98,9 +139,18 @@ export default function Navbar() {
               <button className="text-[#2B2C30] hover:text-[#EDED3B] transition-colors">
                 <Search size={20} />
               </button>
-              <Link href="/dashboard" className="text-[#2B2C30] hover:text-[#EDED3B] transition-colors hidden md:block">
-                <User size={20} />
-              </Link>
+              {user ? (
+                <Link href="/dashboard" className="text-[#2B2C30] hover:text-[#EDED3B] transition-colors hidden md:flex items-center gap-1">
+                  <User size={20} />
+                  <span className="text-xs font-medium" style={{ fontFamily: "Poppins, sans-serif" }}>
+                    {user.user_metadata?.full_name?.split(" ")[0] || "Account"}
+                  </span>
+                </Link>
+              ) : (
+                <Link href="/login" className="text-[#2B2C30] hover:text-[#EDED3B] transition-colors hidden md:block">
+                  <User size={20} />
+                </Link>
+              )}
               <Link href="/cart" className="text-[#2B2C30] hover:text-[#EDED3B] transition-colors relative">
                 <ShoppingCart size={20} />
                 {cartCount > 0 && (
@@ -136,8 +186,21 @@ export default function Navbar() {
               <Link href="/we-buy-collections" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>WE BUY COLLECTIONS</Link>
               <Link href="/contact" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>CONTACT</Link>
               <div className="pt-4 border-t border-gray-100 space-y-2">
-                <Link href="/login" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>LOGIN</Link>
-                <Link href="/register" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>REGISTER</Link>
+                {user ? (
+                  <>
+                    <Link href="/dashboard" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>
+                      MY ACCOUNT
+                    </Link>
+                    <button onClick={handleSignOut} className="block py-2 text-red-500 font-semibold uppercase tracking-wider text-sm w-full text-left" style={{ fontFamily: "Poppins, sans-serif" }}>
+                      LOGOUT
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>LOGIN</Link>
+                    <Link href="/register" className="block py-2 text-[#2B2C30] font-semibold uppercase tracking-wider text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>REGISTER</Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

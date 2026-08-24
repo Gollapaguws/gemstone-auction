@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { createSupabaseClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,15 +40,46 @@ export default function RegisterPage() {
       return;
     }
 
+    // Check if email confirmation is required
+    if (data.user && !data.session) {
+      // Email confirmation required — user exists but no session
+      setNeedsConfirmation(true);
+      setIsLoading(false);
+      return;
+    }
+
+    // Auto-confirmed — go to dashboard
     router.push("/dashboard");
     router.refresh();
   };
+
+  if (needsConfirmation) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md text-center">
+          <div className="bg-white rounded-xl p-8 shadow-sm">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>
+              Check Your Email
+            </h1>
+            <p className="text-gray-500 mb-6">
+              We&apos;ve sent a confirmation link to <strong>{email}</strong>.
+              Please check your inbox and click the link to activate your account.
+            </p>
+            <Link href="/login" className="btn-gold inline-block">
+              Back to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-serif font-bold mb-2">Create Account</h1>
+          <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>Create Account</h1>
           <p className="text-gray-500">Join African Gems & Minerals</p>
         </div>
 
@@ -59,9 +91,7 @@ export default function RegisterPage() {
           )}
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Full Name
-              </label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -76,9 +106,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Email
-              </label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -93,9 +121,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Password
-              </label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -112,19 +138,13 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Confirm Password
-              </label>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Confirm Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -145,16 +165,16 @@ export default function RegisterPage() {
             <label className="flex items-start gap-2">
               <input
                 type="checkbox"
-                className="text-gold-500 rounded focus:ring-gold-500 mt-0.5"
+                className="mt-0.5"
                 required
               />
               <span className="text-sm text-gray-600">
                 I agree to the{" "}
-                <Link href="/terms" className="text-gold-600 hover:underline">
+                <Link href="/terms" className="text-[#2B2C30] underline">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-gold-600 hover:underline">
+                <Link href="/privacy" className="text-[#2B2C30] underline">
                   Privacy Policy
                 </Link>
               </span>
@@ -172,7 +192,7 @@ export default function RegisterPage() {
 
         <p className="text-center mt-6 text-sm text-gray-500">
           Already have an account?{" "}
-          <Link href="/login" className="text-gold-600 hover:text-gold-700 font-medium">
+          <Link href="/login" className="text-[#2B2C30] font-semibold hover:underline">
             Sign in
           </Link>
         </p>

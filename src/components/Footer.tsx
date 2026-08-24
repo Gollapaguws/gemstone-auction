@@ -9,9 +9,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold text-[#EDED3B] mb-4 tracking-wider" style={{ fontFamily: "Poppins, sans-serif" }}>
-              AFRICAN GEMS<span className="text-white">&</span>MINERALS
-            </h3>
+            <Link href="/" className="flex items-center gap-3 mb-4">
+              <img src="/logo.png" alt="African Gems & Minerals" className="h-14 w-auto" />
+            </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-6" style={{ fontFamily: "Hind, sans-serif" }}>
               The Wealth of Africa Lies Beneath the Earth. We specialize in rare and exceptional geological treasures from Africa and around the world.
             </p>

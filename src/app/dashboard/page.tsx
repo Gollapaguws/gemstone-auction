@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   User,
   Gavel,
-  ShoppingCart,
   Heart,
   Settings,
   LogOut,
   Package,
   Clock,
   TrendingUp,
+  Mail,
 } from "lucide-react";
 import { createSupabaseClient } from "@/lib/supabase/client";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 const tabs = [
   { id: "overview", label: "Overview", icon: TrendingUp },
@@ -24,45 +25,25 @@ const tabs = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-const activeBids = [
-  {
-    id: "1",
-    name: "Tanzanite Crystal - Merelani Hills",
-    currentBid: 45000,
-    myBid: 42000,
-    status: "outbid",
-    timeLeft: "2h 34m",
-  },
-  {
-    id: "2",
-    name: "Ajoite in Quartz - Messina",
-    currentBid: 78000,
-    myBid: 78000,
-    status: "winning",
-    timeLeft: "5h 12m",
-  },
-];
-
-const orders = [
-  {
-    id: "ORD-001",
-    product: "Amethyst Cluster - Brazil",
-    amount: 8500,
-    status: "delivered",
-    date: "2026-08-15",
-  },
-  {
-    id: "ORD-002",
-    product: "Black Tourmaline - Namibia",
-    amount: 3200,
-    status: "shipped",
-    date: "2026-08-20",
-  },
-];
-
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createSupabaseClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUser(data.user);
+        setFullName(data.user.user_metadata?.full_name || "");
+        setPhone(data.user.user_metadata?.phone || "");
+      }
+    });
+  }, []);
 
   const handleSignOut = async () => {
     const supabase = createSupabaseClient();
@@ -71,6 +52,32 @@ export default function DashboardPage() {
     router.refresh();
   };
 
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    setSaveMessage("");
+    const supabase = createSupabaseClient();
+    const { error } = await supabase.auth.updateUser({
+      data: { full_name: fullName, phone },
+    });
+    if (error) {
+      setSaveMessage("Error: " + error.message);
+    } else {
+      setSaveMessage("Settings saved successfully!");
+    }
+    setIsSaving(false);
+  };
+
+  if (!user) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-[#EDED3B] border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
@@ -78,12 +85,12 @@ export default function DashboardPage() {
         <aside className="lg:w-64 shrink-0">
           <div className="bg-white rounded-xl p-6 shadow-sm sticky top-24">
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
-              <div className="w-12 h-12 bg-gradient-gold rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-[#EDED3B] rounded-full flex items-center justify-center">
+                <User className="w-6 h-6 text-[#2B2C30]" />
               </div>
-              <div>
-                <p className="font-medium">John Smith</p>
-                <p className="text-sm text-gray-500">john@example.com</p>
+              <div className="min-w-0">
+                <p className="font-medium truncate">{user.user_metadata?.full_name || "User"}</p>
+                <p className="text-sm text-gray-500 truncate">{user.email}</p>
               </div>
             </div>
             <nav className="space-y-1">
@@ -93,7 +100,7 @@ export default function DashboardPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     activeTab === tab.id
-                      ? "bg-gold-50 text-gold-600"
+                      ? "bg-[#EDED3B]/10 text-[#2B2C30]"
                       : "text-gray-600 hover:bg-gray-50"
                   }`}
                 >
@@ -101,7 +108,10 @@ export default function DashboardPage() {
                   {tab.label}
                 </button>
               ))}
-              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors mt-4">
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-colors mt-4"
+              >
                 <LogOut className="w-5 h-5" />
                 Sign Out
               </button>
@@ -113,15 +123,17 @@ export default function DashboardPage() {
         <div className="flex-1">
           {activeTab === "overview" && (
             <div>
-              <h1 className="text-2xl font-serif font-bold mb-6">Dashboard</h1>
+              <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>
+                Welcome, {user.user_metadata?.full_name || "User"}!
+              </h1>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
                 <div className="bg-white rounded-xl p-6 shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gold-100 rounded-lg flex items-center justify-center">
-                      <Gavel className="w-5 h-5 text-gold-600" />
+                    <div className="w-10 h-10 bg-[#EDED3B]/20 rounded-lg flex items-center justify-center">
+                      <Gavel className="w-5 h-5 text-[#EDED3B]" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">5</p>
+                      <p className="text-2xl font-bold">0</p>
                       <p className="text-sm text-gray-500">Active Bids</p>
                     </div>
                   </div>
@@ -132,7 +144,7 @@ export default function DashboardPage() {
                       <Package className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">12</p>
+                      <p className="text-2xl font-bold">0</p>
                       <p className="text-sm text-gray-500">Orders</p>
                     </div>
                   </div>
@@ -143,148 +155,128 @@ export default function DashboardPage() {
                       <Heart className="w-5 h-5 text-red-600" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">8</p>
+                      <p className="text-2xl font-bold">0</p>
                       <p className="text-sm text-gray-500">Watchlist</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <h2 className="font-serif font-bold text-lg mb-4">Recent Activity</h2>
-              <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100">
-                {activeBids.map((bid) => (
-                  <div key={bid.id} className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{bid.name}</p>
-                      <p className="text-sm text-gray-500">
-                        Your bid: R{bid.myBid.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          bid.status === "winning"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {bid.status === "winning" ? "Winning" : "Outbid"}
-                      </span>
-                      <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 justify-end">
-                        <Clock className="w-3 h-3" /> {bid.timeLeft}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <h2 className="font-bold text-lg mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+                Account Info
+              </h2>
+              <div className="bg-white rounded-xl shadow-sm p-6 space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Email</span>
+                  <span className="font-medium">{user.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Name</span>
+                  <span className="font-medium">{user.user_metadata?.full_name || "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="font-medium">{user.user_metadata?.phone || "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Member since</span>
+                  <span className="font-medium">
+                    {new Date(user.created_at).toLocaleDateString("en-ZA", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
               </div>
             </div>
           )}
 
           {activeTab === "bids" && (
             <div>
-              <h1 className="text-2xl font-serif font-bold mb-6">My Bids</h1>
-              <div className="bg-white rounded-xl shadow-sm divide-y divide-gray-100">
-                {activeBids.map((bid) => (
-                  <div key={bid.id} className="p-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{bid.name}</p>
-                      <p className="text-sm text-gray-500">
-                        Current: R{bid.currentBid.toLocaleString()} · Your bid: R
-                        {bid.myBid.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          bid.status === "winning"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {bid.status === "winning" ? "Winning" : "Outbid"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>My Bids</h1>
+              <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                <Gavel className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">You haven&apos;t placed any bids yet.</p>
+                <Link href="/auctions" className="inline-block mt-4 text-sm font-semibold text-[#EDED3B] hover:underline">
+                  Browse Auctions →
+                </Link>
               </div>
             </div>
           )}
 
           {activeTab === "orders" && (
             <div>
-              <h1 className="text-2xl font-serif font-bold mb-6">Orders</h1>
-              <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left p-4 font-medium text-gray-500">Order</th>
-                      <th className="text-left p-4 font-medium text-gray-500">Product</th>
-                      <th className="text-left p-4 font-medium text-gray-500">Amount</th>
-                      <th className="text-left p-4 font-medium text-gray-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {orders.map((order) => (
-                      <tr key={order.id}>
-                        <td className="p-4 font-medium">{order.id}</td>
-                        <td className="p-4">{order.product}</td>
-                        <td className="p-4">R{order.amount.toLocaleString()}</td>
-                        <td className="p-4">
-                          <span
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${
-                              order.status === "delivered"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-blue-100 text-blue-700"
-                            }`}
-                          >
-                            {order.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>Orders</h1>
+              <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No orders yet.</p>
+                <Link href="/catalogue" className="inline-block mt-4 text-sm font-semibold text-[#EDED3B] hover:underline">
+                  Browse Products →
+                </Link>
               </div>
             </div>
           )}
 
           {activeTab === "watchlist" && (
             <div>
-              <h1 className="text-2xl font-serif font-bold mb-6">Watchlist</h1>
-              <p className="text-gray-500">Items you&apos;re watching will appear here.</p>
+              <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>Watchlist</h1>
+              <div className="bg-white rounded-xl shadow-sm p-8 text-center">
+                <Heart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">Your watchlist is empty.</p>
+                <Link href="/catalogue" className="inline-block mt-4 text-sm font-semibold text-[#EDED3B] hover:underline">
+                  Browse Products →
+                </Link>
+              </div>
             </div>
           )}
 
           {activeTab === "settings" && (
             <div>
-              <h1 className="text-2xl font-serif font-bold mb-6">Account Settings</h1>
+              <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>Account Settings</h1>
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <form className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
-                      Full Name
-                    </label>
-                    <input type="text" defaultValue="John Smith" className="input-field" />
+                {saveMessage && (
+                  <div className={`text-sm rounded-lg p-3 mb-4 ${saveMessage.startsWith("Error") ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}`}>
+                    {saveMessage}
                   </div>
+                )}
+                <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
-                      Email
-                    </label>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Email</label>
                     <input
                       type="email"
-                      defaultValue="john@example.com"
+                      value={user.email || ""}
+                      disabled
+                      className="input-field bg-gray-50 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Email cannot be changed</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
                       className="input-field"
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">
-                      Phone
-                    </label>
-                    <input type="tel" placeholder="+27..." className="input-field" />
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Phone</label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+27..."
+                      className="input-field"
+                    />
                   </div>
-                  <button type="button" className="btn-gold">
-                    Save Changes
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={isSaving}
+                    className="btn-gold disabled:opacity-50"
+                  >
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </button>
-                </form>
+                </div>
               </div>
             </div>
           )}
