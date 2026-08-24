@@ -66,9 +66,11 @@ export default function Footer() {
               CONTACT US
             </h4>
             <ul className="space-y-3 text-gray-400 text-sm" style={{ fontFamily: "Hind, sans-serif" }}>
-              <li>South Africa</li>
-              <li>info@africangems.com</li>
-              <li>+27 (0) 12 345 6789</li>
+              <li>Shop 2, Protea Assurance Building</li>
+              <li>Longmarket Street, Greenmarket Square</li>
+              <li>Cape Town, South Africa</li>
+              <li className="pt-2">gems@africangems.com</li>
+              <li>+27 76 665 1711</li>
             </ul>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut } from "lucide-react";
+import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut, Shield } from "lucide-react";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -21,16 +21,29 @@ export default function Navbar() {
   const [cartCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const supabase = createSupabaseClient();
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
+      if (data.user) {
+        supabase.from("profiles").select("role").eq("id", data.user.id).single().then(({ data: profile }) => {
+          setIsAdmin(profile?.role === "admin");
+        });
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        supabase.from("profiles").select("role").eq("id", session.user.id).single().then(({ data: profile }) => {
+          setIsAdmin(profile?.role === "admin");
+        });
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
