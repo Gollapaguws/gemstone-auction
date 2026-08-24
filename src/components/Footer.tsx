@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 
 export default function Footer() {
@@ -10,7 +11,7 @@ export default function Footer() {
           {/* Company Info */}
           <div>
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="African Gems & Minerals" className="h-14 w-auto" />
+              <Image src="/logo.png" alt="African Gems & Minerals" width={56} height={56} className="h-14 w-auto" />
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-6" style={{ fontFamily: "Hind, sans-serif" }}>
               The Wealth of Africa Lies Beneath the Earth. We specialize in rare and exceptional geological treasures from Africa and around the world.

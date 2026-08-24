@@ -1,5 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Gavel, Gem, Mountain, Skull } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "African Gems & Minerals – Fine Minerals, Gemstones, Crystals, Fossils & Mining Antiques",
+  description: "Discover rare and exceptional geological treasures from Africa and around the world. Fine minerals, gemstones, crystals, fossils, and mining antiques. The Wealth of Africa Lies Beneath the Earth.",
+};
 
 const categories = [
   { name: "Fine Minerals", icon: Gem, href: "/catalogue?category=fine-minerals", image: "https://images.unsplash.com/photo-1518562180175-3407f1b60f0b?w=600&h=400&fit=crop" },
@@ -57,10 +64,12 @@ export default function HomePage() {
             {categories.map((cat) => (
               <Link key={cat.name} href={cat.href} className="group">
                 <div className="relative aspect-square overflow-hidden mb-4">
-                  <img 
+                  <Image 
                     src={cat.image} 
                     alt={cat.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-[#EDED3B]/80 transition-all duration-500 flex items-center justify-center">
                     <cat.icon size={32} className="text-white group-hover:text-[#2B2C30] transition-colors" />
@@ -91,10 +100,12 @@ export default function HomePage() {
             {featuredAuctions.map((auction) => (
               <div key={auction.id} className="card-auction group">
                 <div className="relative aspect-square overflow-hidden">
-                  <img 
+                  <Image 
                     src={auction.image} 
                     alt={auction.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4">
                     <span className="badge-live">LIVE</span>
@@ -178,7 +189,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }

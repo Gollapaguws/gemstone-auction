@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut, Shield } from "lucide-react";
+// eslint-disable-next-line @next/next/no-img-element
+import Img from "next/image";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -99,7 +101,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-              <img src="/logo.png" alt="African Gems & Minerals" className="h-16 w-auto" />
+              <Img src="/logo.png" alt="African Gems & Minerals" width={64} height={64} className="h-16 w-auto" priority />
               <div className="hidden sm:block">
                 <h1 className="text-lg font-bold text-[#2B2C30] tracking-wider leading-tight" style={{ fontFamily: "Poppins, sans-serif" }}>
                   AFRICAN GEMS<span className="text-[#EDED3B]">&amp;</span>MINERALS
