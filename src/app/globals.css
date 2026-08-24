@@ -2,68 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 0 0% 7%;
+    --background: 255 255 255;
+    --foreground: 43 44 48;
+    --gold: 237 237 59;
+    --dark: 43 44 48;
+    --dark-deep: 38 39 41;
   }
 
   body {
-    @apply bg-cream-100 text-gray-900 antialiased font-sans;
+    @apply bg-white text-[#2B2C30] antialiased;
+    font-family: "Hind", sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.05em;
   }
 }
 
 @layer components {
   .btn-gold {
-    @apply bg-gradient-gold text-white font-semibold px-6 py-3 rounded-lg 
-           hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg
+    @apply bg-[#EDED3B] text-[#2B2C30] font-semibold px-6 py-3 
+           hover:bg-[#D4D435] transition-all duration-200 uppercase text-sm tracking-widest
            active:scale-[0.98];
+    font-family: "Poppins", sans-serif;
   }
 
   .btn-outline-gold {
-    @apply border-2 border-gold-500 text-gold-600 font-semibold px-6 py-3 rounded-lg 
-           hover:bg-gold-50 transition-all duration-200;
+    @apply border-2 border-[#EDED3B] text-[#EDED3B] font-semibold px-6 py-3 
+           hover:bg-[#EDED3B] hover:text-[#2B2C30] transition-all duration-200 uppercase text-sm tracking-widest;
+    font-family: "Poppins", sans-serif;
   }
 
   .btn-dark {
-    @apply bg-gradient-dark text-white font-semibold px-6 py-3 rounded-lg 
-           hover:opacity-90 transition-all duration-200 shadow-md;
+    @apply bg-[#2B2C30] text-white font-semibold px-6 py-3 
+           hover:bg-[#3A3A3A] transition-all duration-200 uppercase text-sm tracking-widest;
+    font-family: "Poppins", sans-serif;
   }
 
   .card-product {
-    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 
+    @apply bg-white shadow-md hover:shadow-xl transition-all duration-300 
            overflow-hidden cursor-pointer;
   }
 
   .card-auction {
-    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 
-           overflow-hidden border-l-4 border-gold-500;
+    @apply bg-white shadow-md hover:shadow-xl transition-all duration-300 
+           overflow-hidden border-l-4 border-[#EDED3B];
   }
 
   .badge-live {
     @apply bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full 
            animate-pulse uppercase tracking-wider;
+    font-family: "Poppins", sans-serif;
   }
 
   .badge-auction {
-    @apply bg-gold-500 text-white text-xs font-bold px-3 py-1 rounded-full 
+    @apply bg-[#EDED3B] text-[#2B2C30] text-xs font-bold px-3 py-1 rounded-full 
            uppercase tracking-wider;
+    font-family: "Poppins", sans-serif;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg 
-           focus:ring-2 focus:ring-gold-500 focus:border-gold-500 
+    @apply w-full px-4 py-3 border border-gray-300 
+           focus:ring-2 focus:ring-[#EDED3B] focus:border-[#EDED3B] 
            transition-all duration-200 outline-none;
   }
 
   .section-title {
-    @apply text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-2;
+    @apply text-3xl md:text-4xl font-bold text-[#2B2C30] mb-2 uppercase tracking-wider;
+    font-family: "Poppins", sans-serif;
   }
 
   .section-subtitle {
-    @apply text-lg text-gray-600 mb-8;
+    @apply text-lg text-gray-600 mb-8 font-light;
+    font-family: "Hind", sans-serif;
   }
 }
 
@@ -71,4 +88,20 @@
   .text-balance {
     text-wrap: balance;
   }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #EDED3B;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4D435;
 }

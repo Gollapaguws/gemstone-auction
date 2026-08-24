@@ -1,258 +1,189 @@
 import Link from "next/link";
-import { ArrowRight, Gavel, Gem, Clock, Flame } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { ArrowRight, Gavel, Gem, Mountain, Skull } from "lucide-react";
 
 const categories = [
-  {
-    name: "Fine Minerals",
-    href: "/catalogue/minerals",
-    image: "/images/minerals.jpg",
-    description: "Tsumeb, Kalahari, Messina & more",
-  },
-  {
-    name: "Cut & Rough Gemstones",
-    href: "/catalogue/gemstones",
-    image: "/images/gemstones.jpg",
-    description: "Emeralds, Rubies, Sapphires & more",
-  },
-  {
-    name: "Crystals & Holistic",
-    href: "/catalogue/crystals",
-    image: "/images/crystals.jpg",
-    description: "Healing crystals & mineral specimens",
-  },
-  {
-    name: "Fossils",
-    href: "/catalogue/fossils",
-    image: "/images/fossils.jpg",
-    description: "Ancient fossil specimens",
-  },
-  {
-    name: "Mining Antiques",
-    href: "/catalogue/antiques",
-    image: "/images/antiques.jpg",
-    description: "Antique mining memorabilia",
-  },
-  {
-    name: "Lapidary Equipment",
-    href: "/catalogue/lapidary",
-    image: "/images/lapidary.jpg",
-    description: "Tools & equipment for gem cutting",
-  },
+  { name: "Fine Minerals", icon: Gem, href: "/catalogue?category=fine-minerals", image: "https://images.unsplash.com/photo-1518562180175-3407f1b60f0b?w=600&h=400&fit=crop" },
+  { name: "Gemstones", icon: Gem, href: "/catalogue?category=gemstones", image: "https://images.unsplash.com/photo-1551122087-f99a4e1fbaaf?w=600&h=400&fit=crop" },
+  { name: "Crystals", icon: Mountain, href: "/catalogue?category=crystals", image: "https://images.unsplash.com/photo-1501862700950-18382cd41497?w=600&h=400&fit=crop" },
+  { name: "Fossils", icon: Skull, href: "/catalogue?category=fossils", image: "https://images.unsplash.com/photo-1569091791842-7cfb64e04797?w=600&h=400&fit=crop" },
+  { name: "Mining Antiques", icon: Gavel, href: "/catalogue?category=mining-antiques", image: "https://images.unsplash.com/photo-1504711434969-e33886168d5c?w=600&h=400&fit=crop" },
+  { name: "Lapidary Equipment", icon: Gavel, href: "/catalogue?category=lapidary", image: "https://images.unsplash.com/photo-1504711434969-e33886168d5c?w=600&h=400&fit=crop" },
 ];
 
 const featuredAuctions = [
-  {
-    id: "1",
-    name: "Tanzanite Crystal - Merelani Hills",
-    currentBid: 15000,
-    timeLeft: "2h 34m",
-    image: "/images/tanzanite.jpg",
-    bids: 12,
-  },
-  {
-    id: "2",
-    name: "Ajoite in Quartz - Messina",
-    currentBid: 45000,
-    timeLeft: "5h 12m",
-    image: "/images/ajoite.jpg",
-    bids: 23,
-  },
-  {
-    id: "3",
-    name: "Emerald Crystal - Kagem Mine",
-    currentBid: 28000,
-    timeLeft: "1h 08m",
-    image: "/images/emerald.jpg",
-    bids: 18,
-  },
-  {
-    id: "4",
-    name: "Mimetite - Tsumeb Mine",
-    currentBid: 32000,
-    timeLeft: "8h 45m",
-    image: "/images/mimetite.jpg",
-    bids: 15,
-  },
+  { id: 1, title: "Colombian Emerald - 5.2ct", currentBid: 12500, bids: 23, timeLeft: "2d 5h", image: "https://images.unsplash.com/photo-1551122087-f99a4e1fbaaf?w=400&h=400&fit=crop" },
+  { id: 2, title: "Madagascar Rose Quartz Cluster", currentBid: 3200, bids: 15, timeLeft: "1d 12h", image: "https://images.unsplash.com/photo-1501862700950-18382cd41497?w=400&h=400&fit=crop" },
+  { id: 3, title: "Ammonite Fossil - 120 Million Years", currentBid: 8500, bids: 31, timeLeft: "3d 8h", image: "https://images.unsplash.com/photo-1569091791842-7cfb64e04797?w=400&h=400&fit=crop" },
 ];
 
 export default function HomePage() {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      
       {/* Hero Section */}
-      <section className="relative bg-gradient-dark text-white overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-30" />
-        <div className="relative container mx-auto px-4 py-20 md:py-32">
-          <div className="max-w-3xl">
-            <p className="text-gold-400 font-medium tracking-widest uppercase mb-4">
-              Est. 1984
-            </p>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">
-              The Wealth of Africa Lies Beneath The Earth
+      <section className="relative h-[80vh] bg-[#2B2C30] flex items-center">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#2B2C30] to-transparent z-10" />
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518562180175-3407f1b60f0b?w=1920&h=1080&fit=crop')" }}
+        />
+        <div className="relative z-20 max-w-7xl mx-auto px-4 w-full">
+          <div className="max-w-2xl">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: "Poppins, sans-serif" }}>
+              THE WEALTH OF <span className="text-[#EDED3B]">AFRICA</span> LIES BENEATH THE EARTH
             </h1>
-            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl">
-              African Gems & Minerals is a Multifaceted International Company,
-              dealing in Gemstones, Crystals, Fine Minerals, Fossils, Antique
-              Mining Memorabilia and Lapidary equipment.
+            <p className="text-xl text-gray-300 mb-8" style={{ fontFamily: "Hind, sans-serif" }}>
+              Discover rare and exceptional geological treasures from Africa and around the world. Fine minerals, gemstones, crystals, fossils, and mining antiques.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex gap-4">
               <Link href="/catalogue" className="btn-gold inline-flex items-center gap-2">
-                Browse Catalogue <ArrowRight className="w-5 h-5" />
+                EXPLORE COLLECTION <ArrowRight size={18} />
               </Link>
-              <Link
-                href="/auctions"
-                className="btn-outline-gold border-gold-400 text-gold-400 hover:bg-gold-400/10 inline-flex items-center gap-2"
-              >
-                <Gavel className="w-5 h-5" /> View Auctions
+              <Link href="/auctions" className="btn-outline-gold inline-flex items-center gap-2">
+                VIEW AUCTIONS
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Live Auctions Banner */}
-      <section className="bg-gold-500 text-white py-4">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Flame className="w-6 h-6 animate-pulse" />
-            <span className="font-bold text-lg">Live Auctions Now</span>
-            <span className="hidden sm:inline text-gold-100">
-              — 4 active auctions with bids starting from R15,000
-            </span>
+      {/* Categories */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="section-title">OUR CATEGORIES</h2>
+            <p className="section-subtitle">Explore our extensive collection of geological treasures</p>
           </div>
-          <Link
-            href="/auctions"
-            className="bg-white text-gold-600 font-semibold px-4 py-2 rounded-lg hover:bg-gold-50 transition-colors text-sm"
-          >
-            Bid Now
-          </Link>
-        </div>
-      </section>
-
-      {/* Product Categories */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="section-title">Product Catalog</h2>
-          <p className="section-subtitle">
-            Explore our extensive collection of rare and exquisite specimens
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((cat) => (
-            <Link key={cat.href} href={cat.href} className="card-product group">
-              <div className="aspect-[4/3] bg-gray-200 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                  <Gem className="w-16 h-16 opacity-30" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                  <h3 className="text-white font-serif font-bold text-xl">{cat.name}</h3>
-                  <p className="text-gray-200 text-sm">{cat.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Auctions */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="section-title">Featured Auctions</h2>
-              <p className="section-subtitle mb-0">
-                Don&apos;t miss these exceptional pieces
-              </p>
-            </div>
-            <Link
-              href="/auctions"
-              className="text-gold-600 font-medium hover:text-gold-700 flex items-center gap-1"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredAuctions.map((auction) => (
-              <Link
-                key={auction.id}
-                href={`/product/${auction.id}`}
-                className="card-auction group"
-              >
-                <div className="aspect-square bg-gray-200 relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                    <Gem className="w-12 h-12 opacity-30" />
-                  </div>
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="badge-auction">Auction</span>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {categories.map((cat) => (
+              <Link key={cat.name} href={cat.href} className="group">
+                <div className="relative aspect-square overflow-hidden mb-4">
+                  <img 
+                    src={cat.image} 
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-[#EDED3B]/80 transition-all duration-500 flex items-center justify-center">
+                    <cat.icon size={32} className="text-white group-hover:text-[#2B2C30] transition-colors" />
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 group-hover:text-gold-600 transition-colors mb-2 line-clamp-2">
-                    {auction.name}
-                  </h3>
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="text-gray-500 text-xs">Current Bid</p>
-                      <p className="font-bold text-gold-600">
-                        R{auction.currentBid.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-gray-500 text-xs flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {auction.timeLeft}
-                      </p>
-                      <p className="text-gray-500 text-xs">{auction.bids} bids</p>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="text-sm font-bold text-center uppercase tracking-wider group-hover:text-[#EDED3B] transition-colors" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  {cat.name}
+                </h3>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* We Buy Collections */}
-      <section className="bg-gradient-earth text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">
-            We Buy Mineral Collections
+      {/* Featured Auctions */}
+      <section className="py-20 bg-[#F7F7F7]">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-12">
+            <div>
+              <h2 className="section-title">FEATURED AUCTIONS</h2>
+              <p className="section-subtitle mb-0">Bid on our most exclusive items</p>
+            </div>
+            <Link href="/auctions" className="btn-outline-gold hidden md:inline-flex items-center gap-2">
+              VIEW ALL <ArrowRight size={16} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredAuctions.map((auction) => (
+              <div key={auction.id} className="card-auction group">
+                <div className="relative aspect-square overflow-hidden">
+                  <img 
+                    src={auction.image} 
+                    alt={auction.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="badge-live">LIVE</span>
+                  </div>
+                </div>
+                <div className="p-6 bg-[#2B2C30]">
+                  <h3 className="text-white font-bold mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>{auction.title}</h3>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-gray-400 text-xs uppercase tracking-wider" style={{ fontFamily: "Poppins, sans-serif" }}>Current Bid</p>
+                      <p className="text-[#EDED3B] text-2xl font-bold" style={{ fontFamily: "Poppins, sans-serif" }}>${auction.currentBid.toLocaleString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider" style={{ fontFamily: "Poppins, sans-serif" }}>Time Left</p>
+                      <p className="text-white font-bold" style={{ fontFamily: "Poppins, sans-serif" }}>{auction.timeLeft}</p>
+                    </div>
+                  </div>
+                  <p className="text-gray-400 text-sm mt-2">{auction.bids} bids</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center md:hidden">
+            <Link href="/auctions" className="btn-outline-gold inline-flex items-center gap-2">
+              VIEW ALL AUCTIONS <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Live Sales Banner */}
+      <section className="py-16 bg-[#EDED3B]">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-[#2B2C30] mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+            LIVE SALES
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8">
-            Over the years we have bought and showcased over 200 private Mineral,
-            Gemstone, Scientific Instrument, Mining Memorabilia and rare Antique
-            Mining Book Collections.
+          <p className="text-lg text-[#2B2C30]/80 mb-8 max-w-2xl mx-auto" style={{ fontFamily: "Hind, sans-serif" }}>
+            Join our live-streamed sales and bid in real-time. Don&apos;t miss out on exclusive pieces.
           </p>
-          <Link
-            href="/we-buy-collections"
-            className="btn-gold inline-flex items-center gap-2"
-          >
-            Find Out More <ArrowRight className="w-5 h-5" />
+          <Link href="/live-sales" className="btn-dark inline-flex items-center gap-2">
+            JOIN LIVE SALE <ArrowRight size={18} />
           </Link>
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="bg-gold-50 rounded-2xl p-8 md:p-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold mb-4">
-            Join Our Newsletter
-          </h2>
-          <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-            Get the latest news on new arrivals, upcoming auctions, and exclusive
-            offers delivered to your inbox.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="input-field flex-1"
-            />
-            <button type="submit" className="btn-gold whitespace-nowrap">
-              Subscribe
-            </button>
-          </form>
+      {/* Why Choose Us */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="section-title">WHY CHOOSE US</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-[#EDED3B] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gem size={28} className="text-[#2B2C30]" />
+              </div>
+              <h3 className="font-bold text-[#2B2C30] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>AUTHENTICATED</h3>
+              <p className="text-gray-600 text-sm" style={{ fontFamily: "Hind, sans-serif" }}>Every item is verified and authenticated by our expert team.</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-[#EDED3B] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gavel size={28} className="text-[#2B2C30]" />
+              </div>
+              <h3 className="font-bold text-[#2B2C30] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>FAIR AUCTIONS</h3>
+              <p className="text-gray-600 text-sm" style={{ fontFamily: "Hind, sans-serif" }}>Transparent bidding with no hidden fees or charges.</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-[#EDED3B] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mountain size={28} className="text-[#2B2C30]" />
+              </div>
+              <h3 className="font-bold text-[#2B2C30] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>WORLDWIDE SHIPPING</h3>
+              <p className="text-gray-600 text-sm" style={{ fontFamily: "Hind, sans-serif" }}>Secure and insured shipping to anywhere in the world.</p>
+            </div>
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-[#EDED3B] rounded-full flex items-center justify-center mx-auto mb-4">
+                <Skull size={28} className="text-[#2B2C30]" />
+              </div>
+              <h3 className="font-bold text-[#2B2C30] mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>EXPERT ADVICE</h3>
+              <p className="text-gray-600 text-sm" style={{ fontFamily: "Hind, sans-serif" }}>Our team of geologists and gemologists are always available.</p>
+            </div>
+          </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
