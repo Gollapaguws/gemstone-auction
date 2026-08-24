@@ -49,7 +49,8 @@ const config: Config = {
       },
       backgroundImage: {
         "gradient-gold": "linear-gradient(135deg, #EDED3B 0%, #D4D435 50%, #BABA2F 100%)",
-        "gradient-dark": "linear-gradient(135deg, #2B2C30 0%, #262729 50%, #1E1F22 100%)",
+        "gradient-dark": "linear-gradient(135deg, #2B2C30 0%, #262729 100%)",
+        "gradient-earth": "linear-gradient(135deg, #2B2C30 0%, #3A3A3A 100%)",
       },
       animation: {
         "countdown-pulse": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",

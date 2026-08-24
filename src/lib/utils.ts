@@ -10,7 +10,7 @@ export function formatCurrency(amount: number, currency: string = "ZAR"): string
     style: "currency",
     currency,
     minimumFractionDigits: 0,
-  }).format(amount / 100);
+  }).format(amount);
 }
 
 export function formatDate(date: string | Date): string {
