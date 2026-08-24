@@ -1,6 +1,4 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { ArrowRight, Gavel, Gem, Mountain, Skull } from "lucide-react";
 
 const categories = [
@@ -20,9 +18,7 @@ const featuredAuctions = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
+    <div>
       {/* Hero Section */}
       <section className="relative h-[80vh] bg-[#2B2C30] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-r from-[#2B2C30] to-transparent z-10" />
@@ -183,7 +179,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 }

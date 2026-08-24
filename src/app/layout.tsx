@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ChatBot from "@/components/ChatBot";
 
 export const metadata: Metadata = {
   title: "African Gems And Minerals – The Wealth Of Africa Lies Beneath The Earth",
@@ -13,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+        <Footer />
+        <ChatBot />
+      </body>
     </html>
   );
 }

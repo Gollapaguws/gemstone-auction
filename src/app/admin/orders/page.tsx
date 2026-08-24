@@ -1,106 +1,114 @@
 "use client";
 
-import { Search, Eye, Truck, CheckCircle, XCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Edit, X } from "lucide-react";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
-const mockOrders = [
-  { id: "ORD-1432", buyer: "John Smith", email: "john@example.com", product: "Tanzanite Crystal", amount: 45000, status: "paid", date: "2026-08-24" },
-  { id: "ORD-1431", buyer: "Sarah Jones", email: "sarah@example.com", product: "Amethyst Cluster", amount: 8500, status: "shipped", date: "2026-08-23" },
-  { id: "ORD-1430", buyer: "Mike Brown", email: "mike@example.com", product: "Black Tourmaline", amount: 3200, status: "delivered", date: "2026-08-22" },
-  { id: "ORD-1429", buyer: "Emma Wilson", email: "emma@example.com", product: "Emerald Crystal", amount: 32000, status: "pending", date: "2026-08-22" },
-  { id: "ORD-1428", buyer: "David Lee", email: "david@example.com", product: "Fluorite Specimen", amount: 6800, status: "paid", date: "2026-08-21" },
-];
+interface Order {
+  id: string;
+  total_amount: number;
+  status: string;
+  payment_status: string;
+  created_at: string;
+  profiles: { full_name: string; email: string } | null;
+}
 
 export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => { fetchOrders(); }, []);
+
+  const fetchOrders = async () => {
+    const supabase = createSupabaseClient();
+    const { data } = await supabase.from("orders").select("*, profiles!orders_buyer_id_fkey(full_name, email)").order("created_at", { ascending: false });
+    setOrders(data || []);
+    setLoading(false);
+  };
+
+  const handleStatusUpdate = async (orderId: string, status: string) => {
+    const supabase = createSupabaseClient();
+    await supabase.from("orders").update({ status }).eq("id", orderId);
+    setShowModal(false);
+    setEditingOrder(null);
+    fetchOrders();
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-serif font-bold">Orders</h1>
-          <p className="text-gray-500 text-sm">Manage customer orders</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "Poppins, sans-serif" }}>Orders</h1>
+        <p className="text-gray-500 text-sm">Manage customer orders and fulfillment</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: "Pending", count: 3, color: "bg-yellow-100 text-yellow-700" },
-          { label: "Paid", count: 8, color: "bg-green-100 text-green-700" },
-          { label: "Shipped", count: 5, color: "bg-blue-100 text-blue-700" },
-          { label: "Delivered", count: 12, color: "bg-purple-100 text-purple-700" },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm text-center">
-            <p className="text-2xl font-bold">{stat.count}</p>
-            <span className={`text-xs px-2 py-1 rounded-full ${stat.color}`}>{stat.label}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Orders Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" placeholder="Search orders..." className="input-field pl-10 text-sm py-2" />
-          </div>
-          <select className="input-field w-auto text-sm py-2">
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Paid</option>
-            <option>Shipped</option>
-            <option>Delivered</option>
-          </select>
-        </div>
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-4 font-medium text-gray-500">Order</th>
+              <th className="text-left p-4 font-medium text-gray-500">Order ID</th>
               <th className="text-left p-4 font-medium text-gray-500">Customer</th>
-              <th className="text-left p-4 font-medium text-gray-500">Product</th>
               <th className="text-left p-4 font-medium text-gray-500">Amount</th>
+              <th className="text-left p-4 font-medium text-gray-500">Payment</th>
               <th className="text-left p-4 font-medium text-gray-500">Status</th>
               <th className="text-left p-4 font-medium text-gray-500">Date</th>
-              <th className="text-right p-4 font-medium text-gray-500">Actions</th>
+              <th className="text-left p-4 font-medium text-gray-500">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {mockOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
-                <td className="p-4 font-medium">{order.id}</td>
-                <td className="p-4">
-                  <div>
-                    <p>{order.buyer}</p>
-                    <p className="text-xs text-gray-500">{order.email}</p>
-                  </div>
-                </td>
-                <td className="p-4">{order.product}</td>
-                <td className="p-4 font-bold">R{order.amount.toLocaleString()}</td>
-                <td className="p-4">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    order.status === "paid" ? "bg-green-100 text-green-700" :
-                    order.status === "shipped" ? "bg-blue-100 text-blue-700" :
-                    order.status === "delivered" ? "bg-purple-100 text-purple-700" :
-                    "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="p-4 text-gray-500">{order.date}</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2 justify-end">
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg" title="View"><Eye className="w-4 h-4 text-gray-500" /></button>
-                    {order.status === "paid" && (
-                      <button className="p-1.5 hover:bg-blue-50 rounded-lg" title="Mark Shipped"><Truck className="w-4 h-4 text-blue-500" /></button>
-                    )}
-                    {order.status === "shipped" && (
-                      <button className="p-1.5 hover:bg-green-50 rounded-lg" title="Mark Delivered"><CheckCircle className="w-4 h-4 text-green-500" /></button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {loading ? (
+              <tr><td colSpan={7} className="p-8 text-center text-gray-400">Loading...</td></tr>
+            ) : orders.length === 0 ? (
+              <tr><td colSpan={7} className="p-8 text-center text-gray-400">No orders yet.</td></tr>
+            ) : (
+              orders.map((order) => (
+                <tr key={order.id}>
+                  <td className="p-4 font-medium">{order.id.slice(0, 8)}</td>
+                  <td className="p-4">
+                    <p>{order.profiles?.full_name || "—"}</p>
+                    <p className="text-xs text-gray-400">{order.profiles?.email || ""}</p>
+                  </td>
+                  <td className="p-4 font-bold">R{(order.total_amount || 0).toLocaleString()}</td>
+                  <td className="p-4">
+                    <span className={`text-xs px-2 py-1 rounded-full ${order.payment_status === "paid" ? "bg-green-100 text-green-700" : order.payment_status === "failed" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}>
+                      {order.payment_status}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className={`text-xs px-2 py-1 rounded-full ${order.status === "delivered" ? "bg-purple-100 text-purple-700" : order.status === "shipped" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-gray-500 text-xs">{new Date(order.created_at).toLocaleDateString("en-ZA")}</td>
+                  <td className="p-4">
+                    <button onClick={() => { setEditingOrder(order); setShowModal(true); }} className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {showModal && editingOrder && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-lg">Update Order Status</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Order: {editingOrder.id.slice(0, 8)}</p>
+            <div className="space-y-2">
+              {["pending", "processing", "shipped", "delivered", "cancelled"].map((status) => (
+                <button key={status} onClick={() => handleStatusUpdate(editingOrder.id, status)} className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${editingOrder.status === status ? "bg-[#EDED3B] text-[#2B2C30]" : "hover:bg-gray-100"}`}>
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,189 +1,196 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Clock, Users, Edit, Eye, Trash2, Gavel, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, X } from "lucide-react";
+import { createSupabaseClient } from "@/lib/supabase/client";
 
-const mockAuctions = [
-  { id: "1", name: "Tanzanite Crystal", type: "timed", startPrice: 15000, currentBid: 45000, bids: 12, endTime: "2026-08-25T18:00:00Z", status: "active" },
-  { id: "2", name: "Ajoite in Quartz", type: "timed", startPrice: 20000, currentBid: 78000, bids: 23, endTime: "2026-08-25T21:00:00Z", status: "active" },
-  { id: "3", name: "Emerald Crystal", type: "silent", startPrice: 25000, currentBid: 62000, bids: 18, endTime: "2026-08-26T18:00:00Z", status: "active" },
-  { id: "4", name: "Mimetite - Tsumeb", type: "timed", startPrice: 10000, currentBid: 32000, bids: 15, endTime: "2026-08-24T16:00:00Z", status: "ended" },
-  { id: "5", name: "Watermelon Tourmaline", type: "live", startPrice: 12000, currentBid: 28000, bids: 9, endTime: "2026-08-27T18:00:00Z", status: "active" },
-];
+interface Auction {
+  id: string;
+  product_id: string;
+  auction_type: string;
+  start_price: number;
+  current_price: number | null;
+  reserve_price: number | null;
+  start_time: string;
+  end_time: string;
+  is_live: boolean;
+  products: { name: string } | null;
+}
 
 export default function AdminAuctionsPage() {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newAuction, setNewAuction] = useState({
-    name: "",
-    type: "timed",
-    startPrice: "",
-    reservePrice: "",
-    startTime: "",
-    endTime: "",
-    productId: "",
+  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingAuction, setEditingAuction] = useState<Auction | null>(null);
+  const [form, setForm] = useState({
+    product_id: "", auction_type: "standard", start_price: "",
+    reserve_price: "", start_time: "", end_time: "", is_live: "false"
   });
+
+  useEffect(() => { fetchData(); }, []);
+
+  const fetchData = async () => {
+    const supabase = createSupabaseClient();
+    const [auctionsData, productsData] = await Promise.all([
+      supabase.from("auctions").select("*, products(name)").order("end_time", { ascending: false }),
+      supabase.from("products").select("id, name").eq("status", "active")
+    ]);
+    setAuctions(auctionsData.data || []);
+    setProducts(productsData.data || []);
+    setLoading(false);
+  };
+
+  const handleSave = async () => {
+    const supabase = createSupabaseClient();
+    const auctionData = {
+      product_id: form.product_id,
+      auction_type: form.auction_type,
+      start_price: parseInt(form.start_price),
+      reserve_price: form.reserve_price ? parseInt(form.reserve_price) : null,
+      start_time: form.start_time,
+      end_time: form.end_time,
+      is_live: form.is_live === "true",
+    };
+
+    if (editingAuction) {
+      await supabase.from("auctions").update(auctionData).eq("id", editingAuction.id);
+    } else {
+      await supabase.from("auctions").insert(auctionData);
+    }
+
+    setShowModal(false);
+    setEditingAuction(null);
+    fetchData();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this auction?")) return;
+    const supabase = createSupabaseClient();
+    await supabase.from("auctions").delete().eq("id", id);
+    fetchData();
+  };
+
+  const openEdit = (auction: Auction) => {
+    setEditingAuction(auction);
+    setForm({
+      product_id: auction.product_id,
+      auction_type: auction.auction_type,
+      start_price: auction.start_price.toString(),
+      reserve_price: auction.reserve_price?.toString() || "",
+      start_time: auction.start_time.slice(0, 16),
+      end_time: auction.end_time.slice(0, 16),
+      is_live: auction.is_live.toString(),
+    });
+    setShowModal(true);
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-serif font-bold">Auctions</h1>
-          <p className="text-gray-500 text-sm">Manage timed, silent, and live auctions</p>
-        </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-gold flex items-center gap-2 text-sm"
-        >
-          <Plus className="w-4 h-4" /> Create Auction
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "Poppins, sans-serif" }}>Auctions</h1>
+        <button onClick={() => { setEditingAuction(null); setForm({ product_id: "", auction_type: "standard", start_price: "", reserve_price: "", start_time: "", end_time: "", is_live: "false" }); setShowModal(true); }} className="btn-gold text-sm py-2 px-4 inline-flex items-center gap-1">
+          <Plus className="w-4 h-4" /> New Auction
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <Gavel className="w-5 h-5 text-green-600" />
-          </div>
-          <div>
-            <p className="text-xl font-bold">18</p>
-            <p className="text-sm text-gray-500">Active Auctions</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-            <Clock className="w-5 h-5 text-yellow-600" />
-          </div>
-          <div>
-            <p className="text-xl font-bold">3</p>
-            <p className="text-sm text-gray-500">Ending Today</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <Users className="w-5 h-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-xl font-bold">142</p>
-            <p className="text-sm text-gray-500">Total Bids Today</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Auctions Table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th className="text-left p-4 font-medium text-gray-500">Auction</th>
+              <th className="text-left p-4 font-medium text-gray-500">Product</th>
               <th className="text-left p-4 font-medium text-gray-500">Type</th>
               <th className="text-left p-4 font-medium text-gray-500">Start Price</th>
-              <th className="text-left p-4 font-medium text-gray-500">Current Bid</th>
-              <th className="text-left p-4 font-medium text-gray-500">Bids</th>
-              <th className="text-left p-4 font-medium text-gray-500">Ends</th>
+              <th className="text-left p-4 font-medium text-gray-500">Current Price</th>
+              <th className="text-left p-4 font-medium text-gray-500">End Time</th>
               <th className="text-left p-4 font-medium text-gray-500">Status</th>
-              <th className="text-right p-4 font-medium text-gray-500">Actions</th>
+              <th className="text-left p-4 font-medium text-gray-500">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {mockAuctions.map((auction) => (
-              <tr key={auction.id} className="hover:bg-gray-50">
-                <td className="p-4 font-medium">{auction.name}</td>
-                <td className="p-4">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    auction.type === "live"
-                      ? "bg-red-100 text-red-700"
-                      : auction.type === "silent"
-                      ? "bg-gray-100 text-gray-700"
-                      : "bg-gold-100 text-gold-700"
-                  }`}>
-                    {auction.type}
-                  </span>
-                </td>
-                <td className="p-4">R{auction.startPrice.toLocaleString()}</td>
-                <td className="p-4 font-bold text-gold-600">R{auction.currentBid.toLocaleString()}</td>
-                <td className="p-4">{auction.bids}</td>
-                <td className="p-4 text-gray-500">
-                  {new Date(auction.endTime).toLocaleDateString("en-ZA", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </td>
-                <td className="p-4">
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    auction.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                  }`}>
-                    {auction.status}
-                  </span>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2 justify-end">
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Eye className="w-4 h-4 text-gray-500" /></button>
-                    <button className="p-1.5 hover:bg-gray-100 rounded-lg"><Edit className="w-4 h-4 text-gray-500" /></button>
-                    <button className="p-1.5 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4 text-red-500" /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {loading ? (
+              <tr><td colSpan={7} className="p-8 text-center text-gray-400">Loading...</td></tr>
+            ) : auctions.length === 0 ? (
+              <tr><td colSpan={7} className="p-8 text-center text-gray-400">No auctions yet.</td></tr>
+            ) : (
+              auctions.map((auction) => (
+                <tr key={auction.id}>
+                  <td className="p-4 font-medium">{auction.products?.name || "—"}</td>
+                  <td className="p-4"><span className="text-xs bg-gray-100 px-2 py-1 rounded">{auction.auction_type}</span></td>
+                  <td className="p-4">R{auction.start_price.toLocaleString()}</td>
+                  <td className="p-4 font-bold text-[#2B2C30]">R{(auction.current_price || auction.start_price).toLocaleString()}</td>
+                  <td className="p-4 text-gray-500">{new Date(auction.end_time).toLocaleString("en-ZA")}</td>
+                  <td className="p-4">
+                    <span className={`text-xs px-2 py-1 rounded-full ${auction.is_live ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                      {auction.is_live ? "Live" : "Scheduled"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex gap-2">
+                      <button onClick={() => openEdit(auction)} className="p-1 hover:bg-gray-100 rounded"><Edit className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(auction.id)} className="p-1 hover:bg-red-50 rounded text-red-500"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Create Auction Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="font-serif font-bold text-xl">Create New Auction</h2>
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-lg">{editingAuction ? "Edit Auction" : "New Auction"}</h2>
+              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Product</label>
-                <select className="input-field">
-                  <option>Select a product...</option>
-                  <option>Tanzanite Crystal</option>
-                  <option>Ajoite in Quartz</option>
-                  <option>Emerald Crystal</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Auction Type</label>
-                <select
-                  value={newAuction.type}
-                  onChange={(e) => setNewAuction({ ...newAuction, type: e.target.value })}
-                  className="input-field"
-                >
-                  <option value="timed">Timed Auction</option>
-                  <option value="silent">Silent Auction</option>
-                  <option value="live">Live Auction</option>
+                <select value={form.product_id} onChange={(e) => setForm({ ...form, product_id: e.target.value })} className="input-field">
+                  <option value="">Select product</option>
+                  {products.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Type</label>
+                  <select value={form.auction_type} onChange={(e) => setForm({ ...form, auction_type: e.target.value })} className="input-field">
+                    <option value="standard">Standard</option>
+                    <option value="live">Live</option>
+                    <option value="silent">Silent</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Live</label>
+                  <select value={form.is_live} onChange={(e) => setForm({ ...form, is_live: e.target.value })} className="input-field">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">Start Price (ZAR)</label>
-                  <input type="number" className="input-field" placeholder="15000" />
+                  <input type="number" value={form.start_price} onChange={(e) => setForm({ ...form, start_price: e.target.value })} className="input-field" required />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">Reserve Price (ZAR)</label>
-                  <input type="number" className="input-field" placeholder="Optional" />
+                  <input type="number" value={form.reserve_price} onChange={(e) => setForm({ ...form, reserve_price: e.target.value })} className="input-field" placeholder="Optional" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">Start Time</label>
-                  <input type="datetime-local" className="input-field" />
+                  <input type="datetime-local" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} className="input-field" required />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 block mb-1">End Time</label>
-                  <input type="datetime-local" className="input-field" />
+                  <input type="datetime-local" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} className="input-field" required />
                 </div>
               </div>
-              {newAuction.type === "live" && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Stream URL</label>
-                  <input type="url" className="input-field" placeholder="https://youtube.com/watch?v=..." />
-                </div>
-              )}
-            </div>
-            <div className="p-6 border-t border-gray-100 flex gap-3 justify-end">
-              <button onClick={() => setShowAddModal(false)} className="btn-outline-gold text-sm py-2">Cancel</button>
-              <button className="btn-gold text-sm py-2">Create Auction</button>
+              <button onClick={handleSave} className="btn-gold w-full">{editingAuction ? "Update Auction" : "Create Auction"}</button>
             </div>
           </div>
         </div>
